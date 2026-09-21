@@ -1,0 +1,27 @@
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import AppRoutes from './routes/AppRoutes';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="app-layout">
+          <Navbar />
+          <main className="main-content">
+            <AppRoutes />
+          </main>
+          <footer className="app-footer">
+            <div className="footer-container">
+              <p>&copy; {new Date().getFullYear()} College Event Registration Portal &bull; MERN Stack Mini-Project</p>
+            </div>
+          </footer>
+        </div>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
