@@ -10,9 +10,16 @@
     "seed:admin": "node server/scripts/seedAdmin.js",
     "install-all": "npm install && npm --prefix server install && npm --prefix client install",
     "build": "npm --prefix client run build",
-    "render-build": "npm --prefix server install && npm --prefix client install && npm --prefix client run build"
+    "render-build": "npm --prefix server install && npm --prefix client install --include=dev && npm --prefix client run build"
   },
-  "keywords": ["mern", "college-portal", "event-registration", "react", "express", "mongodb"],
+  "keywords": [
+    "mern",
+    "college-portal",
+    "event-registration",
+    "react",
+    "express",
+    "mongodb"
+  ],
   "author": "",
   "license": "ISC"
 }
