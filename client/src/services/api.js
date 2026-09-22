@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// In production on Render (or any host), relative path '/api' points directly to the server hosting the app.
+// In local development, it can use VITE_API_URL or the Vite dev proxy to localhost:5000.
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,7 +30,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // If token expired or invalid, clear local auth
       const currentPath = window.location.pathname;
       if (currentPath !== '/login' && currentPath !== '/register') {
         localStorage.removeItem('token');
