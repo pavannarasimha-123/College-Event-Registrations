@@ -1,54 +1,102 @@
 const nodemailer = require('nodemailer');
 
-// Create reusable transporter
-const createTransporter = () => {
+let _transporter = null;
+let _transporterReady = false;
+let _previewMode = false;
+
+/**
+ * Initialize the email transporter.
+ * - If EMAIL_USER + EMAIL_PASS are set → use real Gmail/SMTP.
+ * - Otherwise → auto-create an Ethereal test account so emails
+ *   are actually sent and viewable at a preview URL.
+ */
+const initTransporter = async () => {
+  if (_transporter && _transporterReady) return _transporter;
+
   const host = process.env.EMAIL_HOST;
   const port = process.env.EMAIL_PORT || 587;
   const user = process.env.EMAIL_USER;
   const pass = process.env.EMAIL_PASS;
 
-  if (host && user && pass) {
-    return nodemailer.createTransport({
-      host,
-      port: Number(port),
-      secure: Number(port) === 465,
-      auth: { user, pass }
-    });
-  }
-
-  // If using Gmail directly via EMAIL_USER and EMAIL_PASS
+  // Option 1: Real SMTP (Gmail or custom host)
   if (user && pass) {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user, pass }
-    });
+    const config = host
+      ? { host, port: Number(port), secure: Number(port) === 465, auth: { user, pass } }
+      : { service: 'gmail', auth: { user, pass } };
+
+    _transporter = nodemailer.createTransport(config);
+    _previewMode = false;
+    _transporterReady = true;
+    console.log(`[Email] ✓ Real SMTP transporter ready (${host || 'gmail'})`);
+    return _transporter;
   }
 
-  // Default fallback: mock logger transporter for development & testing
-  return {
-    sendMail: async (mailOptions) => {
-      console.log('\n================== EMAIL SERVICE (DEV/MOCK) ==================');
-      console.log(`To:      ${mailOptions.to}`);
-      console.log(`Subject: ${mailOptions.subject}`);
-      if (mailOptions.attachments && mailOptions.attachments.length > 0) {
-        console.log(`Attachment: ${mailOptions.attachments[0].filename} (${mailOptions.attachments[0].content.length} bytes)`);
+  // Option 2: Ethereal test account (auto-created, emails viewable at URL)
+  try {
+    const testAccount = await nodemailer.createTestAccount();
+    _transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: testAccount.user,
+        pass: testAccount.pass
       }
-      console.log('--------------------------------------------------------------');
-      console.log(mailOptions.text || '[HTML Content Sent]');
-      console.log('==============================================================\n');
-      return { messageId: `mock-${Date.now()}` };
-    }
-  };
+    });
+    _previewMode = true;
+    _transporterReady = true;
+    console.log('[Email] ✓ Ethereal test account created automatically');
+    console.log(`[Email]   User: ${testAccount.user}`);
+    console.log('[Email]   Emails will be viewable at preview URLs logged after each send');
+    console.log('[Email]   To send REAL emails, add EMAIL_USER + EMAIL_PASS to .env');
+    return _transporter;
+  } catch (err) {
+    console.warn('[Email] ⚠ Could not create Ethereal account:', err.message);
+    // Final fallback: console logger
+    _transporter = {
+      sendMail: async (mailOptions) => {
+        console.log('\n================== EMAIL SERVICE (CONSOLE FALLBACK) ==================');
+        console.log(`To:      ${mailOptions.to}`);
+        console.log(`Subject: ${mailOptions.subject}`);
+        if (mailOptions.attachments && mailOptions.attachments.length > 0) {
+          console.log(`Attachment: ${mailOptions.attachments[0].filename} (${mailOptions.attachments[0].content.length} bytes)`);
+        }
+        console.log('--------------------------------------------------------------');
+        console.log(mailOptions.text || '[HTML Content Sent]');
+        console.log('====================================================================\n');
+        return { messageId: `console-${Date.now()}` };
+      }
+    };
+    _previewMode = false;
+    _transporterReady = true;
+    return _transporter;
+  }
 };
 
-const transporter = createTransporter();
+/**
+ * Send an email and log the Ethereal preview URL if in test mode.
+ */
+const sendEmail = async (mailOptions) => {
+  const transporter = await initTransporter();
+  const info = await transporter.sendMail(mailOptions);
+
+  // Log Ethereal preview URL so the user can click to view the email
+  if (_previewMode && info.messageId) {
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`[Email] ✉ Preview URL: ${previewUrl}`);
+    }
+  }
+
+  return info;
+};
 
 /**
  * Sends a Password Reset Email with action link
  */
 const sendPasswordResetEmail = async (toEmail, resetUrl, userName = 'Student') => {
   const mailOptions = {
-    from: process.env.EMAIL_FROM || '"College Event Portal" <no-reply@college.edu>',
+    from: process.env.EMAIL_FROM || '"College Event Portal" <no-reply@college-events.edu>',
     to: toEmail,
     subject: 'Password Reset Request - College Event Registration Portal',
     text: `Hello ${userName},\n\nYou requested a password reset for your College Event Portal account.\nPlease click the following link to reset your password:\n${resetUrl}\n\nThis link is valid for 1 hour.\nIf you did not request this, please ignore this email.`,
@@ -79,7 +127,10 @@ const sendPasswordResetEmail = async (toEmail, resetUrl, userName = 'Student') =
     `
   };
 
-  return await transporter.sendMail(mailOptions);
+  const info = await sendEmail(mailOptions);
+  // Return preview URL so the API can pass it to the frontend
+  const previewUrl = _previewMode ? nodemailer.getTestMessageUrl(info) : null;
+  return { info, previewUrl };
 };
 
 /**
@@ -97,7 +148,7 @@ const sendEventRegistrationEmail = async (toEmail, studentName, event, registrat
     : 'TBA';
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM || '"College Event Portal" <no-reply@college.edu>',
+    from: process.env.EMAIL_FROM || '"College Event Portal" <no-reply@college-events.edu>',
     to: toEmail,
     subject: `Registration Confirmed: ${event.eventTitle}`,
     text: `Hello ${studentName},\n\nYour registration for "${event.eventTitle}" is confirmed!\n\nDate: ${eventDateStr}\nVenue: ${event.venue}\nOrganizer: ${event.organizer}\n\nYour official Event Pass has been attached to this email as a PDF.\nSee you at the event!`,
@@ -149,10 +200,13 @@ const sendEventRegistrationEmail = async (toEmail, studentName, event, registrat
       : []
   };
 
-  return await transporter.sendMail(mailOptions);
+  const info = await sendEmail(mailOptions);
+  const previewUrl = _previewMode ? nodemailer.getTestMessageUrl(info) : null;
+  return { info, previewUrl };
 };
 
 module.exports = {
+  initTransporter,
   sendPasswordResetEmail,
   sendEventRegistrationEmail
 };

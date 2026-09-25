@@ -69,6 +69,15 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
+
+    // Pre-initialize email transporter (creates Ethereal test account if no SMTP configured)
+    try {
+      const { initTransporter } = require('./utils/emailService');
+      await initTransporter();
+    } catch (emailInitErr) {
+      console.warn('[Server] Email transporter init warning:', emailInitErr.message);
+    }
+
     const serverInstance = app.listen(PORT, () => {
       console.log(`[Server] College Event Registration API running on port ${PORT}`);
       console.log(`[Server] Base URL: http://localhost:${PORT}`);

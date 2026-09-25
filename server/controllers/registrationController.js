@@ -74,7 +74,10 @@ const registerEvent = async (req, res, next) => {
         const ev = newRegistration.eventId;
         if (student && student.email) {
           const pdfBuffer = await generateEventTicketPDF(ev, student, newRegistration);
-          await sendEventRegistrationEmail(student.email, student.name, ev, newRegistration, pdfBuffer);
+          const result = await sendEventRegistrationEmail(student.email, student.name, ev, newRegistration, pdfBuffer);
+          if (result && result.previewUrl) {
+            console.log(`[Registration Email] Preview: ${result.previewUrl}`);
+          }
         }
       } catch (emailErr) {
         console.error('[Registration Email Error]:', emailErr.message);

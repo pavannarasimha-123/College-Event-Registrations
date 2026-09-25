@@ -144,8 +144,13 @@ const forgotPassword = async (req, res, next) => {
     const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
 
     // Send email
+    let emailPreviewUrl = null;
     try {
-      await sendPasswordResetEmail(user.email, resetUrl, user.name);
+      const result = await sendPasswordResetEmail(user.email, resetUrl, user.name);
+      if (result && result.previewUrl) {
+        emailPreviewUrl = result.previewUrl;
+        console.log(`[ForgotPassword] Email preview: ${emailPreviewUrl}`);
+      }
     } catch (emailErr) {
       console.warn('[Email Warning] Could not dispatch email via SMTP:', emailErr.message);
       // Even if external SMTP fails, token is saved so reset link works!
@@ -154,7 +159,9 @@ const forgotPassword = async (req, res, next) => {
     res.status(200).json({
       message: 'Password reset instructions have been sent to your email address.',
       // In development mode, provide resetToken directly for convenience
-      ...(process.env.NODE_ENV !== 'production' && { devResetUrl: resetUrl })
+      ...(process.env.NODE_ENV !== 'production' && { devResetUrl: resetUrl }),
+      // Provide email preview URL if using Ethereal test mode
+      ...(emailPreviewUrl && { emailPreviewUrl })
     });
   } catch (error) {
     next(error);

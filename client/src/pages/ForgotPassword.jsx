@@ -8,12 +8,14 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [devResetUrl, setDevResetUrl] = useState('');
+  const [emailPreviewUrl, setEmailPreviewUrl] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setMessage('');
     setDevResetUrl('');
+    setEmailPreviewUrl('');
 
     if (!email.trim()) {
       return setError('Please enter your registered email address.');
@@ -25,6 +27,9 @@ const ForgotPassword = () => {
       setMessage(res.message || 'A password reset link has been dispatched to your email.');
       if (res.devResetUrl) {
         setDevResetUrl(res.devResetUrl);
+      }
+      if (res.emailPreviewUrl) {
+        setEmailPreviewUrl(res.emailPreviewUrl);
       }
     } catch (err) {
       console.error('Forgot password error:', err);
@@ -53,9 +58,21 @@ const ForgotPassword = () => {
         {error && <div className="form-alert error">{error}</div>}
         {message && <div className="form-alert success">{message}</div>}
 
+        {emailPreviewUrl && (
+          <div className="form-alert info" style={{ wordBreak: 'break-all' }}>
+            <strong>📧 View Sent Email:</strong>{' '}
+            <a href={emailPreviewUrl} target="_blank" rel="noopener noreferrer" className="auth-link">
+              Click here to view the password reset email
+            </a>
+            <p style={{ margin: '6px 0 0', fontSize: '0.8rem', opacity: 0.8 }}>
+              (Opens Ethereal Mail preview — this proves the email was sent successfully)
+            </p>
+          </div>
+        )}
+
         {devResetUrl && (
           <div className="form-alert info" style={{ wordBreak: 'break-all' }}>
-            <strong>Local Dev Direct Link:</strong>{' '}
+            <strong>🔗 Direct Reset Link:</strong>{' '}
             <Link to={new URL(devResetUrl, window.location.origin).pathname} className="auth-link">
               Click here to reset your password now
             </Link>
@@ -97,6 +114,7 @@ const ForgotPassword = () => {
               onClick={() => {
                 setMessage('');
                 setDevResetUrl('');
+                setEmailPreviewUrl('');
               }}
             >
               Try another email
