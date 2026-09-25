@@ -28,9 +28,14 @@ const ForgotPassword = () => {
       }
     } catch (err) {
       console.error('Forgot password error:', err);
-      setError(
-        err.response?.data?.message || 'Unable to process your request. Please verify the email and try again.'
-      );
+      const serverMsg = err.response?.data?.message;
+      if (serverMsg) {
+        setError(serverMsg);
+      } else if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        setError('Cannot connect to server. Please ensure the backend is running or deployment has completed.');
+      } else {
+        setError('Unable to process your request. Please verify the email and try again.');
+      }
     } finally {
       setLoading(false);
     }
