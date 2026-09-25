@@ -1,11 +1,13 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
 
-// Load environment variables
+// Load environment variables reliably from current dir or server dir
 dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');

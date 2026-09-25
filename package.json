@@ -8,9 +8,19 @@
     "client": "npm --prefix client run dev",
     "start": "node server/server.js",
     "seed:admin": "node server/scripts/seedAdmin.js",
-    "install-all": "npm install && npm --prefix server install && npm --prefix client install",
-    "build": "npm --prefix client run build",
-    "render-build": "npm --prefix server install && npm --prefix client install --include=dev && npm --prefix client run build"
+    "build": "npm --prefix server install && npm --prefix client install && npm --prefix client run build",
+    "render-build": "npm --prefix server install && npm --prefix client install && npm --prefix client run build",
+    "postinstall": "npm --prefix server install && npm --prefix client install"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5",
+    "nodemailer": "^7.0.11",
+    "pdfkit": "^0.20.2"
   },
   "keywords": [
     "mern",
