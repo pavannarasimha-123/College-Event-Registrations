@@ -182,6 +182,14 @@ const resetPassword = async (req, res, next) => {
       return res.status(400).json({ message: 'Password reset link is invalid or has expired.' });
     }
 
+    // Check if new password is identical to the current password
+    const isSamePassword = await user.comparePassword(password);
+    if (isSamePassword) {
+      return res.status(400).json({
+        message: 'Your new password cannot be the same as your previous password. Please choose a different password.'
+      });
+    }
+
     // Update password (pre-save hook will hash with bcrypt)
     user.password = password;
     user.resetPasswordToken = undefined;
