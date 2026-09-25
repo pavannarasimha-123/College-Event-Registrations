@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const Registration = require('../models/Registration');
 const Event = require('../models/Event');
 const User = require('../models/User');
+const { generateEventTicketPDF } = require('../utils/pdfTicketGenerator');
+const { sendEventRegistrationEmail } = require('../utils/emailService');
 
 // Helper to find an event by ObjectId or custom eventId
 const findEventByIdOrCustomId = async (id) => {
@@ -65,8 +67,22 @@ const registerEvent = async (req, res, next) => {
     await newRegistration.populate('eventId', 'eventId eventTitle category eventDate venue organizer maximumParticipants');
     await newRegistration.populate('studentId', 'userId name email');
 
+    // Asynchronously generate PDF pass and email it to the registered student
+    (async () => {
+      try {
+        const student = newRegistration.studentId;
+        const ev = newRegistration.eventId;
+        if (student && student.email) {
+          const pdfBuffer = await generateEventTicketPDF(ev, student, newRegistration);
+          await sendEventRegistrationEmail(student.email, student.name, ev, newRegistration, pdfBuffer);
+        }
+      } catch (emailErr) {
+        console.error('[Registration Email Error]:', emailErr.message);
+      }
+    })();
+
     res.status(201).json({
-      message: 'Successfully registered for the event!',
+      message: 'Successfully registered for the event! An event pass PDF has been sent to your email.',
       registration: newRegistration
     });
   } catch (error) {

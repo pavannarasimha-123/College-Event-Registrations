@@ -81,7 +81,10 @@ const Login = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password *</label>
+            <div className="form-label-row">
+              <label htmlFor="password">Password *</label>
+              <Link to="/forgot-password" className="auth-link form-sublink">Forgot password?</Link>
+            </div>
             <input
               type="password"
               id="password"

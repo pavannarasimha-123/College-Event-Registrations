@@ -5,6 +5,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from '../pages/Home';
 import Register from '../pages/Register';
 import Login from '../pages/Login';
+import ForgotPassword from '../pages/ForgotPassword';
+import ResetPassword from '../pages/ResetPassword';
 import StudentDashboard from '../pages/StudentDashboard';
 import EventList from '../pages/EventList';
 import EventDetails from '../pages/EventDetails';
@@ -23,6 +25,8 @@ const AppRoutes = () => {
       <Route path="/events" element={<EventList />} />
       <Route path="/events/:id" element={<EventDetails />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/register" element={<Register />} />
 
       {/* Protected Student Routes */}

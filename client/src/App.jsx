@@ -13,11 +13,6 @@ function App() {
           <main className="main-content">
             <AppRoutes />
           </main>
-          <footer className="app-footer">
-            <div className="footer-container">
-              <p>&copy; {new Date().getFullYear()} College Event Registration Portal &bull; MERN Stack Mini-Project</p>
-            </div>
-          </footer>
         </div>
       </AuthProvider>
     </BrowserRouter>
