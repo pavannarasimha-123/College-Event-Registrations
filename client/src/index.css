@@ -1335,6 +1335,65 @@ textarea:focus {
   color: var(--text-muted);
 }
 
+/* ---------------- Participants Toolbar & PDF Export ---------------- */
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.participants-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background-color: #f8fafc;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin-bottom: 16px;
+}
+
+.sort-control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-control-group label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sort-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  background-color: #ffffff;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.toolbar-stats {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.modal-footer-between {
+  justify-content: space-between !important;
+}
+
 /* ---------------- Responsive Styles ---------------- */
 @media (max-width: 768px) {
   .navbar-toggle {

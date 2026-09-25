@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { eventService } from '../services/eventService';
 import { registrationService } from '../services/registrationService';
+import { generateParticipantsPDF, sortParticipants } from '../utils/pdfExport';
 import EventForm from '../components/EventForm';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
@@ -19,6 +20,7 @@ const ManageEvents = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Participants Modal States
+  const [participantSortOrder, setParticipantSortOrder] = useState('name-asc');
   const [participantsModal, setParticipantsModal] = useState({
     isOpen: false,
     event: null,
@@ -333,9 +335,25 @@ const ManageEvents = () => {
                   {participantsModal.event?.maximumParticipants})
                 </p>
               </div>
-              <button className="modal-close-btn" onClick={handleCloseParticipants}>
-                ✕
-              </button>
+              <div className="modal-header-actions">
+                <button
+                  onClick={() =>
+                    generateParticipantsPDF(
+                      participantsModal.event,
+                      participantsModal.participants,
+                      participantSortOrder
+                    )
+                  }
+                  className="btn btn-primary btn-sm"
+                  disabled={participantsModal.participants.length === 0}
+                  title="Download sorted PDF report of registered participants"
+                >
+                  📥 Download PDF
+                </button>
+                <button className="modal-close-btn" onClick={handleCloseParticipants}>
+                  ✕
+                </button>
+              </div>
             </div>
 
             <div className="modal-body">
@@ -350,46 +368,98 @@ const ManageEvents = () => {
                   <p>No students have registered for this event yet.</p>
                 </div>
               ) : (
-                <div className="table-responsive">
-                  <table className="custom-table">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>Student Name</th>
-                        <th>Student Email</th>
-                        <th>Registration Date</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {participantsModal.participants.map((p, idx) => (
-                        <tr key={p._id || p.registrationId || idx}>
-                          <td>{idx + 1}</td>
-                          <td className="font-semibold">{p.studentName}</td>
-                          <td>{p.studentEmail}</td>
-                          <td>
-                            {p.registrationDate
-                              ? new Date(p.registrationDate).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric'
-                                })
-                              : 'N/A'}
-                          </td>
-                          <td>
-                            <span className="status-badge registered">
-                              {p.participationStatus || 'Registered'}
-                            </span>
-                          </td>
+                <>
+                  {/* Sorting & Export Toolbar */}
+                  <div className="participants-toolbar">
+                    <div className="sort-control-group">
+                      <label htmlFor="participantSort">
+                        <span className="sort-icon">↕️</span> Sort Students By:
+                      </label>
+                      <select
+                        id="participantSort"
+                        value={participantSortOrder}
+                        onChange={(e) => setParticipantSortOrder(e.target.value)}
+                        className="sort-select"
+                      >
+                        <option value="name-asc">Student Name (A to Z)</option>
+                        <option value="name-desc">Student Name (Z to A)</option>
+                        <option value="email-asc">Student Email (A to Z)</option>
+                        <option value="date-asc">Registration Date (Oldest First)</option>
+                        <option value="date-desc">Registration Date (Newest First)</option>
+                      </select>
+                    </div>
+
+                    <div className="toolbar-stats">
+                      <span>Total: <strong>{participantsModal.participants.length}</strong> registered students</span>
+                    </div>
+                  </div>
+
+                  <div className="table-responsive">
+                    <table className="custom-table">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>Student Name</th>
+                          <th>Student Email</th>
+                          <th>Student ID</th>
+                          <th>Registration Date</th>
+                          <th>Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {sortParticipants(participantsModal.participants, participantSortOrder).map(
+                          (p, idx) => (
+                            <tr key={p._id || p.registrationId || idx}>
+                              <td>{idx + 1}</td>
+                              <td className="font-semibold">{p.studentName}</td>
+                              <td>{p.studentEmail}</td>
+                              <td>
+                                <span className="text-muted text-xs">
+                                  {p.userId || p.registrationId || '-'}
+                                </span>
+                              </td>
+                              <td>
+                                {p.registrationDate
+                                  ? new Date(p.registrationDate).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      year: 'numeric'
+                                    })
+                                  : 'N/A'}
+                              </td>
+                              <td>
+                                <span className="status-badge registered">
+                                  {p.participationStatus || 'Registered'}
+                                </span>
+                              </td>
+                            </tr>
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
 
-            <div className="modal-footer">
+            <div className="modal-footer modal-footer-between">
+              {participantsModal.participants.length > 0 ? (
+                <button
+                  onClick={() =>
+                    generateParticipantsPDF(
+                      participantsModal.event,
+                      participantsModal.participants,
+                      participantSortOrder
+                    )
+                  }
+                  className="btn btn-primary btn-sm"
+                  title="Download sorted PDF report of registered participants"
+                >
+                  📥 Download PDF Report ({participantsModal.participants.length})
+                </button>
+              ) : (
+                <div></div>
+              )}
               <button onClick={handleCloseParticipants} className="btn btn-secondary btn-sm">
                 Close
               </button>
