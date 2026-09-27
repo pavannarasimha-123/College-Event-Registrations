@@ -37,7 +37,7 @@ const StudentDashboard = () => {
   return (
     <div className="dashboard-container">
       {/* Welcome Banner */}
-      <div className="dashboard-welcome-banner">
+      <div className="dashboard-welcome-banner liquid-glass">
         <div>
           <span className="badge-tag">Student Portal</span>
           <h1 className="welcome-heading">Welcome, {user?.name || 'Student'}!</h1>
@@ -59,7 +59,7 @@ const StudentDashboard = () => {
 
       {/* Metrics Row */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <div className="stat-card liquid-glass">
           <div className="stat-icon-wrapper blue">🎫</div>
           <div className="stat-info">
             <span className="stat-label">Total Registrations</span>
@@ -67,7 +67,7 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card liquid-glass">
           <div className="stat-icon-wrapper green">⏳</div>
           <div className="stat-info">
             <span className="stat-label">Upcoming Events</span>
@@ -75,7 +75,7 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card liquid-glass">
           <div className="stat-icon-wrapper gray">🏁</div>
           <div className="stat-info">
             <span className="stat-label">Past / Completed</span>

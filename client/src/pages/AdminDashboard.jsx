@@ -46,7 +46,7 @@ const AdminDashboard = () => {
   return (
     <div className="dashboard-container">
       {/* Admin Header */}
-      <div className="dashboard-welcome-banner admin-banner">
+      <div className="dashboard-welcome-banner admin-banner liquid-glass">
         <div>
           <span className="badge-tag admin">Administrator Portal</span>
           <h1 className="welcome-heading">College Events Overview</h1>
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
 
       {/* Real-time Metrics from MongoDB */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <div className="stat-card liquid-glass">
           <div className="stat-icon-wrapper blue">📅</div>
           <div className="stat-info">
             <span className="stat-label">Total Events</span>
@@ -73,7 +73,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card liquid-glass">
           <div className="stat-icon-wrapper green">👥</div>
           <div className="stat-info">
             <span className="stat-label">Total Registrations</span>
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card liquid-glass">
           <div className="stat-icon-wrapper orange">⏳</div>
           <div className="stat-info">
             <span className="stat-label">Upcoming Events</span>

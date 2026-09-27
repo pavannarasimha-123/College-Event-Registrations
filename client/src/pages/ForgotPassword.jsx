@@ -48,7 +48,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="auth-page-container">
-      <div className="auth-card">
+      <div className="auth-card liquid-glass">
         <div className="auth-header">
           <div className="auth-icon">🔑</div>
           <h2>Reset Password</h2>
