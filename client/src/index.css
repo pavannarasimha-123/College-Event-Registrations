@@ -75,7 +75,7 @@ html, body {
   position: relative;
   min-height: 100vh;
   overflow-x: hidden;
-  background-color: #0c0c0c;
+  background-color: transparent;
   color: #ffffff;
 }
 
@@ -93,15 +93,14 @@ html, body {
   height: 100%;
   object-fit: cover;
   pointer-events: none;
-  opacity: 0.38;
-  filter: contrast(1.1) brightness(0.85);
+  opacity: 0.90;
+  filter: contrast(1.08) brightness(1.02);
 }
 
 .bg-video-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 15%, rgba(12, 12, 12, 0.35) 0%, rgba(12, 12, 12, 0.75) 60%, #0c0c0c 100%),
-              linear-gradient(180deg, rgba(12, 12, 12, 0.5) 0%, rgba(12, 12, 12, 0.2) 40%, rgba(12, 12, 12, 0.9) 100%);
+  background: radial-gradient(circle at 50% 30%, rgba(12, 12, 12, 0.05) 0%, rgba(12, 12, 12, 0.25) 70%, rgba(12, 12, 12, 0.5) 100%);
   pointer-events: none;
 }
 
@@ -188,12 +187,12 @@ html, body {
 
 /* ---------------- Liquid Glass Treatment ---------------- */
 .liquid-glass {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(14, 18, 26, 0.5);
   background-blend-mode: luminosity;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), 0 20px 44px -12px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 44px -12px rgba(0, 0, 0, 0.6);
   position: relative;
   overflow: hidden;
 }
