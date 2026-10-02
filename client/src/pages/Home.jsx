@@ -36,18 +36,12 @@ const Home = () => {
   return (
     <div className="home-container">
       {/* Hero Section */}
-      <section className="hero-section liquid-glass">
+      <section className="hero-section">
         <div className="hero-content">
-          <div className="section-eyebrow">
-            <span className="eyebrow-dot" />
-            <span className="eyebrow-text">Campus Activities Hub</span>
-            <span className="eyebrow-pill">Official Portal</span>
-          </div>
-          <h1 className="hero-title">
-            College Events. <span className="animate-shiny">Revitalized.</span>
-          </h1>
+          <span className="hero-badge">Campus Activities Hub</span>
+          <h1 className="hero-title">College Event Registration Portal</h1>
           <p className="hero-subtitle">
-            The premier campus activities hub. Seamlessly discover, register, and manage technical hackathons, cultural fests, sports meets, and industry workshops with instant digital passes.
+            Register for technical, cultural, sports and workshop events organized by the college.
           </p>
           <div className="hero-actions">
             {!isAuthenticated ? (

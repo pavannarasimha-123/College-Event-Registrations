@@ -213,7 +213,7 @@ const ManageEvents = () => {
           </button>
         </div>
       ) : (
-        <div className="table-card liquid-glass">
+        <div className="table-card">
           <div className="table-responsive">
             <table className="custom-table">
               <thead>
@@ -292,7 +292,7 @@ const ManageEvents = () => {
       {/* CREATE / EDIT EVENT MODAL */}
       {isFormModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content liquid-glass">
+          <div className="modal-content">
             <div className="modal-header">
               <h2 className="modal-title">
                 {editingEvent ? 'Edit College Event' : 'Create New College Event'}
@@ -325,7 +325,7 @@ const ManageEvents = () => {
       {/* VIEW PARTICIPANTS MODAL */}
       {participantsModal.isOpen && (
         <div className="modal-overlay">
-          <div className="modal-content modal-lg liquid-glass">
+          <div className="modal-content modal-lg">
             <div className="modal-header">
               <div>
                 <h2 className="modal-title">Registered Participants</h2>

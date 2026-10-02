@@ -2,12 +2,6 @@ import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const LogoMark = () => (
-  <svg viewBox="0 0 256 256" width="18" height="18" fill="currentColor">
-    <path d="M 0 128 C 70.692 128 128 185.308 128 256 L 64 256 C 64 220.654 35.346 192 0 192 Z M 256 192 C 220.654 192 192 220.654 192 256 L 128 256 C 128 185.308 185.308 128 256 128 Z M 128 0 C 128 70.692 70.692 128 0 128 L 0 64 C 35.346 64 64 35.346 64 0 Z M 192 0 C 192 35.346 220.654 64 256 64 L 256 128 C 185.308 128 128 70.692 128 0 Z" />
-  </svg>
-);
-
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, isStudent, logout } = useAuth();
   const navigate = useNavigate();
@@ -26,9 +20,7 @@ const Navbar = () => {
     <header className="navbar-header">
       <div className="navbar-container">
         <Link to="/" className="navbar-brand" onClick={closeMobileMenu}>
-          <span className="brand-icon">
-            <LogoMark />
-          </span>
+          <span className="brand-icon">🎓</span>
           <span className="brand-text">College Events</span>
         </Link>
 

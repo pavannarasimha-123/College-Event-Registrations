@@ -21,7 +21,7 @@ const EventCard = ({ event }) => {
     : availableSeats <= 0;
 
   return (
-    <div className="event-card liquid-glass">
+    <div className="event-card">
       <div className="event-card-header">
         <span className="category-badge">{event.category}</span>
         {isFull ? (

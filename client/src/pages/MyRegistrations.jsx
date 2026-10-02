@@ -92,7 +92,7 @@ const MyRegistrations = () => {
         </div>
       ) : (
         <div className="table-card">
-          <div className="table-responsive liquid-glass">
+          <div className="table-responsive">
             <table className="custom-table">
               <thead>
                 <tr>
