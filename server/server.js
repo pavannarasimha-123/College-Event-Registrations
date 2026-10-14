@@ -35,11 +35,25 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Health Check Endpoint
 app.get('/api/health', (req, res) => {
+  const mongoose = require('mongoose');
   res.status(200).json({
     status: 'healthy',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'connecting',
     uptime: process.uptime(),
     timestamp: new Date()
   });
+});
+
+// Database readiness check for data API routes
+app.use('/api', (req, res, next) => {
+  const mongoose = require('mongoose');
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: 'Database connection is establishing. Please retry in a few seconds.',
+      dbState: mongoose.connection.readyState
+    });
+  }
+  next();
 });
 
 // Primary REST Endpoints
