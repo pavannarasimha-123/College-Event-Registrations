@@ -166,6 +166,15 @@ const ManageEvents = () => {
     }
   };
 
+  const filterParam = searchParams.get('filter');
+  const now = new Date();
+  const displayedEvents = events.filter((e) => {
+    if (filterParam === 'upcoming') {
+      return new Date(e.eventDate) >= now;
+    }
+    return true;
+  });
+
   return (
     <div className="page-container">
       <div className="page-header">
@@ -193,24 +202,46 @@ const ManageEvents = () => {
         </div>
       )}
 
+      {filterParam === 'upcoming' && (
+        <div className="filter-notification-banner">
+          <span>⏳ Showing <strong>Upcoming Events Only</strong> ({displayedEvents.length} scheduled)</span>
+          <button 
+            onClick={() => setSearchParams({})} 
+            className="btn btn-secondary btn-xs"
+          >
+            Show All Events
+          </button>
+        </div>
+      )}
+
       {error && <ErrorMessage message={error} onRetry={fetchEvents} />}
 
       {loading ? (
         <LoadingSpinner message="Loading events inventory..." />
-      ) : events.length === 0 ? (
+      ) : displayedEvents.length === 0 ? (
         <div className="empty-state-card">
           <span className="empty-icon">🎪</span>
-          <h3>No Events Created</h3>
-          <p>No college events are currently scheduled.</p>
-          <button
-            onClick={() => {
-              setEditingEvent(null);
-              setIsFormModalOpen(true);
-            }}
-            className="btn btn-primary btn-sm"
-          >
-            Create First Event
-          </button>
+          <h3>{filterParam === 'upcoming' ? 'No Upcoming Events Scheduled' : 'No Events Created'}</h3>
+          <p>
+            {filterParam === 'upcoming'
+              ? 'There are currently no events scheduled for future dates.'
+              : 'No college events are currently scheduled.'}
+          </p>
+          {filterParam === 'upcoming' ? (
+            <button onClick={() => setSearchParams({})} className="btn btn-secondary btn-sm">
+              Show All Events
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setEditingEvent(null);
+                setIsFormModalOpen(true);
+              }}
+              className="btn btn-primary btn-sm"
+            >
+              Create First Event
+            </button>
+          )}
         </div>
       ) : (
         <div className="table-card">
@@ -227,7 +258,7 @@ const ManageEvents = () => {
                 </tr>
               </thead>
               <tbody>
-                {events.map((evt) => {
+                {displayedEvents.map((evt) => {
                   const id = evt._id || evt.eventId;
                   const regCount = evt.registeredCount || 0;
                   const isFull = regCount >= evt.maximumParticipants;

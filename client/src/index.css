@@ -858,7 +858,55 @@ body {
 
 .welcome-actions {
   display: flex;
+  gap: 12px;
+}
+
+/* ---------------- Enhanced Manage Events Button ---------------- */
+.btn-manage-events {
+  display: inline-flex;
+  align-items: center;
   gap: 10px;
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+  color: #ffffff !important;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-manage-events:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px 0 rgba(37, 99, 235, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  color: #ffffff !important;
+}
+
+.btn-manage-events:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.25);
+}
+
+.btn-manage-icon {
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+}
+
+.btn-manage-arrow {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.btn-manage-events:hover .btn-manage-arrow {
+  transform: translateX(4px);
 }
 
 .stats-grid {
@@ -875,6 +923,68 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+/* Interactive Stat Card Link */
+.stat-card-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card-link:hover {
+  transform: translateY(-4px);
+  border-color: #93c5fd;
+  box-shadow: 0 12px 24px -4px rgba(30, 64, 175, 0.12), 0 4px 8px -2px rgba(15, 23, 42, 0.05);
+  background-color: #fafcff;
+}
+
+.stat-card-link .stat-card-arrow {
+  margin-left: auto;
+  font-size: 1.2rem;
+  color: #94a3b8;
+  transition: transform 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+}
+
+.stat-card-link:hover .stat-card-arrow {
+  color: var(--primary);
+  transform: translateX(5px);
+}
+
+.stat-card-link .stat-card-hint {
+  font-size: 0.74rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 4px;
+  display: block;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+.stat-card-link:hover .stat-card-hint {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.filter-notification-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-md);
+  color: #1e40af;
+  font-size: 0.92rem;
+  margin-bottom: 18px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .stat-icon-wrapper {

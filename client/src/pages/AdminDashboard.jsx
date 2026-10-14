@@ -55,39 +55,59 @@ const AdminDashboard = () => {
           </p>
         </div>
         <div className="welcome-actions">
-          <Link to="/admin/events" className="btn btn-primary">
-            Manage Events
+          <Link to="/admin/events" className="btn btn-manage-events">
+            <span className="btn-manage-icon">📅</span>
+            <span>Manage Events</span>
+            <span className="btn-manage-arrow">&rarr;</span>
           </Link>
         </div>
       </div>
 
       {error && <ErrorMessage message={error} onRetry={fetchDashboardData} />}
 
-      {/* Real-time Metrics from MongoDB */}
+      {/* Real-time Metrics from MongoDB - Interactive Clickable Cards */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <Link 
+          to="/admin/events" 
+          className="stat-card stat-card-link"
+          title="Click to view and manage all events"
+        >
           <div className="stat-icon-wrapper blue">📅</div>
           <div className="stat-info">
             <span className="stat-label">Total Events</span>
             <h3 className="stat-value">{loading ? '...' : stats.totalEvents}</h3>
+            <span className="stat-card-hint">View all events &rarr;</span>
           </div>
-        </div>
+          <div className="stat-card-arrow">&rarr;</div>
+        </Link>
 
-        <div className="stat-card">
+        <Link 
+          to="/admin/events" 
+          className="stat-card stat-card-link"
+          title="Click to inspect all event registrations and download reports"
+        >
           <div className="stat-icon-wrapper green">👥</div>
           <div className="stat-info">
             <span className="stat-label">Total Registrations</span>
             <h3 className="stat-value">{loading ? '...' : stats.totalRegistrations}</h3>
+            <span className="stat-card-hint">Manage registrations &rarr;</span>
           </div>
-        </div>
+          <div className="stat-card-arrow">&rarr;</div>
+        </Link>
 
-        <div className="stat-card">
+        <Link 
+          to="/admin/events?filter=upcoming" 
+          className="stat-card stat-card-link"
+          title="Click to view scheduled upcoming events"
+        >
           <div className="stat-icon-wrapper orange">⏳</div>
           <div className="stat-info">
             <span className="stat-label">Upcoming Events</span>
             <h3 className="stat-value">{loading ? '...' : stats.upcomingEvents}</h3>
+            <span className="stat-card-hint">Filter upcoming &rarr;</span>
           </div>
-        </div>
+          <div className="stat-card-arrow">&rarr;</div>
+        </Link>
       </div>
 
       {/* Recent Events & Participant Access */}

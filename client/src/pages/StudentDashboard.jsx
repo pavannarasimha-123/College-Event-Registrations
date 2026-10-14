@@ -57,31 +57,49 @@ const StudentDashboard = () => {
 
       {error && <div className="form-alert error">{error}</div>}
 
-      {/* Metrics Row */}
+      {/* Metrics Row - Interactive Clickable Cards */}
       <div className="stats-grid">
-        <div className="stat-card">
+        <Link 
+          to="/student/my-registrations" 
+          className="stat-card stat-card-link"
+          title="Click to view all your registered events"
+        >
           <div className="stat-icon-wrapper blue">🎫</div>
           <div className="stat-info">
             <span className="stat-label">Total Registrations</span>
             <h3 className="stat-value">{loading ? '...' : registrations.length}</h3>
+            <span className="stat-card-hint">View all registrations &rarr;</span>
           </div>
-        </div>
+          <div className="stat-card-arrow">&rarr;</div>
+        </Link>
 
-        <div className="stat-card">
+        <Link 
+          to="/student/my-registrations" 
+          className="stat-card stat-card-link"
+          title="Click to view your upcoming registered events"
+        >
           <div className="stat-icon-wrapper green">⏳</div>
           <div className="stat-info">
             <span className="stat-label">Upcoming Events</span>
             <h3 className="stat-value">{loading ? '...' : upcomingRegistered.length}</h3>
+            <span className="stat-card-hint">View schedule &rarr;</span>
           </div>
-        </div>
+          <div className="stat-card-arrow">&rarr;</div>
+        </Link>
 
-        <div className="stat-card">
+        <Link 
+          to="/student/my-registrations" 
+          className="stat-card stat-card-link"
+          title="Click to view your event history"
+        >
           <div className="stat-icon-wrapper gray">🏁</div>
           <div className="stat-info">
             <span className="stat-label">Past / Completed</span>
             <h3 className="stat-value">{loading ? '...' : completedCount}</h3>
+            <span className="stat-card-hint">View history &rarr;</span>
           </div>
-        </div>
+          <div className="stat-card-arrow">&rarr;</div>
+        </Link>
       </div>
 
       {/* Upcoming Registered Events Section */}
