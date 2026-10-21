@@ -28,8 +28,14 @@ const StudentDashboard = () => {
   }, []);
 
   const now = new Date();
+  
+  // Filter ONLY upcoming events (scheduled for today or in the future)
   const upcomingRegistered = registrations.filter((reg) => {
-    return reg.eventId && new Date(reg.eventId.eventDate) >= now;
+    if (!reg.eventId || !reg.eventId.eventDate) return false;
+    const eventDate = new Date(reg.eventId.eventDate);
+    const endOfEventDay = new Date(eventDate);
+    endOfEventDay.setHours(23, 59, 59, 999);
+    return endOfEventDay >= now;
   });
 
   const completedCount = registrations.length - upcomingRegistered.length;
@@ -60,7 +66,7 @@ const StudentDashboard = () => {
       {/* Metrics Row - Interactive Clickable Cards */}
       <div className="stats-grid">
         <Link 
-          to="/student/my-registrations" 
+          to="/student/my-registrations?filter=all" 
           className="stat-card stat-card-link"
           title="Click to view all your registered events"
         >
@@ -74,7 +80,7 @@ const StudentDashboard = () => {
         </Link>
 
         <Link 
-          to="/student/my-registrations" 
+          to="/student/my-registrations?filter=upcoming" 
           className="stat-card stat-card-link"
           title="Click to view your upcoming registered events"
         >
@@ -88,9 +94,9 @@ const StudentDashboard = () => {
         </Link>
 
         <Link 
-          to="/student/my-registrations" 
+          to="/student/my-registrations?filter=past" 
           className="stat-card stat-card-link"
-          title="Click to view your event history"
+          title="Click to view your completed event history"
         >
           <div className="stat-icon-wrapper gray">🏁</div>
           <div className="stat-info">
@@ -102,15 +108,15 @@ const StudentDashboard = () => {
         </Link>
       </div>
 
-      {/* Upcoming Registered Events Section */}
+      {/* Upcoming Registered Events Section - STRICTLY UPCOMING ONLY */}
       <div className="dashboard-section">
         <div className="section-header">
           <div>
             <h2 className="section-title">Upcoming Registered Events</h2>
-            <p className="section-subtitle">Events you are scheduled to participate in</p>
+            <p className="section-subtitle">Future events you are registered to participate in</p>
           </div>
-          <Link to="/student/my-registrations" className="btn btn-outline btn-sm">
-            View All ({registrations.length})
+          <Link to="/student/my-registrations?filter=upcoming" className="btn btn-outline btn-sm">
+            View All Upcoming ({upcomingRegistered.length})
           </Link>
         </div>
 
@@ -120,7 +126,7 @@ const StudentDashboard = () => {
           <div className="empty-state-card">
             <span className="empty-icon">📅</span>
             <h3>No Upcoming Events</h3>
-            <p>You have not registered for any upcoming events yet.</p>
+            <p>You currently have no registered upcoming events. Browse campus events to join!</p>
             <Link to="/events" className="btn btn-primary btn-sm">
               Explore Available Events
             </Link>
@@ -139,7 +145,7 @@ const StudentDashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {upcomingRegistered.slice(0, 5).map((reg) => (
+                {upcomingRegistered.map((reg) => (
                   <tr key={reg._id || reg.registrationId}>
                     <td className="font-semibold">{reg.eventId?.eventTitle}</td>
                     <td>

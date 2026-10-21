@@ -439,6 +439,17 @@ body {
   background-color: var(--danger-light);
   color: var(--danger);
 }
+.capacity-badge.ended {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.event-card.past-event {
+  opacity: 0.88;
+  border-color: #cbd5e1;
+  background-color: #fafbfc;
+}
 
 .event-title {
   font-size: 1.15rem;

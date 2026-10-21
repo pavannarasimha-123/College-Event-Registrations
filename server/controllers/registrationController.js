@@ -32,7 +32,17 @@ const registerEvent = async (req, res, next) => {
       return res.status(404).json({ message: 'Event not found.' });
     }
 
-    // 2. Check whether the student is already registered for this event
+    // 2. Check whether the event has already ended (Registration closed for past events)
+    const eventDate = new Date(event.eventDate);
+    const endOfEventDay = new Date(eventDate);
+    endOfEventDay.setHours(23, 59, 59, 999);
+    if (endOfEventDay < new Date()) {
+      return res.status(400).json({
+        message: 'Registration is closed. This event has already taken place.'
+      });
+    }
+
+    // 3. Check whether the student is already registered for this event
     const existingRegistration = await Registration.findOne({
       studentId: studentObjectId,
       eventId: event._id
@@ -42,18 +52,18 @@ const registerEvent = async (req, res, next) => {
       return res.status(409).json({ message: 'You are already registered for this event.' });
     }
 
-    // 3. Count existing active registrations for this event
+    // 4. Count existing active registrations for this event
     const registeredCount = await Registration.countDocuments({
       eventId: event._id,
       participationStatus: 'Registered'
     });
 
-    // 4. Compare the count with maximumParticipants
+    // 5. Compare the count with maximumParticipants
     if (registeredCount >= event.maximumParticipants) {
       return res.status(400).json({ message: 'This event is full. Maximum participant capacity reached.' });
     }
 
-    // 5. Create new Registration document
+    // 6. Create new Registration document
     const newRegistration = new Registration({
       studentId: studentObjectId,
       eventId: event._id,

@@ -49,6 +49,14 @@ const EventDetails = () => {
     fetchEventData();
   }, [id, isAuthenticated, isStudent]);
 
+  // Compute event date status
+  const eventDate = event ? new Date(event.eventDate) : null;
+  const endOfEventDay = eventDate ? new Date(eventDate) : null;
+  if (endOfEventDay) {
+    endOfEventDay.setHours(23, 59, 59, 999);
+  }
+  const isPast = endOfEventDay ? endOfEventDay < new Date() : false;
+
   const handleRegister = async () => {
     if (!isAuthenticated) {
       navigate('/login', { state: { from: { pathname: `/events/${id}` } } });
@@ -59,6 +67,14 @@ const EventDetails = () => {
       setActionMessage({
         type: 'error',
         text: 'Admins cannot register as event participants.'
+      });
+      return;
+    }
+
+    if (isPast) {
+      setActionMessage({
+        type: 'error',
+        text: 'Registration is closed. This event has already taken place.'
       });
       return;
     }
@@ -88,6 +104,11 @@ const EventDetails = () => {
           text: 'You are already registered for this event.'
         });
         setIsAlreadyRegistered(true);
+      } else if (status === 400 && msg.toLowerCase().includes('already taken place')) {
+        setActionMessage({
+          type: 'error',
+          text: 'Registration is closed. This event has already taken place.'
+        });
       } else if (status === 400 && msg.toLowerCase().includes('full')) {
         setActionMessage({
           type: 'error',
@@ -143,7 +164,9 @@ const EventDetails = () => {
           <div className="event-detail-header">
             <div className="badge-row">
               <span className="category-badge">{event.category}</span>
-              {isFull ? (
+              {isPast ? (
+                <span className="capacity-badge ended">Event Ended</span>
+              ) : isFull ? (
                 <span className="capacity-badge full">Event Full</span>
               ) : (
                 <span className="capacity-badge open">{availableSeats} Seats Available</span>
@@ -233,14 +256,25 @@ const EventDetails = () => {
           <div className="registration-action-box">
             {!isAuthenticated ? (
               <div className="unauth-box">
-                <p>You must be signed in with a Student account to register for this event.</p>
-                <Link
-                  to="/login"
-                  state={{ from: { pathname: `/events/${id}` } }}
-                  className="btn btn-primary btn-md"
-                >
-                  Login to Register
-                </Link>
+                {isPast ? (
+                  <>
+                    <p>This event concluded on {formattedDate}. Registrations are closed.</p>
+                    <button className="btn btn-secondary btn-md" disabled style={{ cursor: 'not-allowed', opacity: 0.7 }}>
+                      Event Ended
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p>You must be signed in with a Student account to register for this event.</p>
+                    <Link
+                      to="/login"
+                      state={{ from: { pathname: `/events/${id}` } }}
+                      className="btn btn-primary btn-md"
+                    >
+                      Login to Register
+                    </Link>
+                  </>
+                )}
               </div>
             ) : isAdmin ? (
               <div className="admin-notice-box">
@@ -256,13 +290,27 @@ const EventDetails = () => {
                 <div className="registered-info">
                   <span className="check-icon">✓</span>
                   <div>
-                    <h4>You are registered for this event!</h4>
-                    <p>Your seat has been reserved. You can view or manage it in My Registrations.</p>
+                    <h4>You registered for this event!</h4>
+                    <p>
+                      {isPast
+                        ? `This event took place on ${formattedDate}. Thank you for participating!`
+                        : 'Your seat has been reserved. You can view or manage it in My Registrations.'}
+                    </p>
                   </div>
                 </div>
                 <Link to="/student/my-registrations" className="btn btn-outline btn-sm">
                   Go to My Registrations
                 </Link>
+              </div>
+            ) : isPast ? (
+              <div className="full-notice-box" style={{ borderColor: '#cbd5e1', backgroundColor: '#f8fafc' }}>
+                <h4 style={{ color: '#475569' }}>Event Completed &bull; Registration Closed</h4>
+                <p style={{ color: '#64748b' }}>
+                  This event took place on {formattedDate}. Registrations are no longer accepted for past events.
+                </p>
+                <button className="btn btn-secondary" disabled style={{ cursor: 'not-allowed', opacity: 0.7 }}>
+                  Event Has Ended
+                </button>
               </div>
             ) : isFull ? (
               <div className="full-notice-box">

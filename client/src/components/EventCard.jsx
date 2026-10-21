@@ -20,11 +20,19 @@ const EventCard = ({ event }) => {
     ? event.isFull 
     : availableSeats <= 0;
 
+  // Check if event date has passed
+  const eventDate = new Date(event.eventDate);
+  const endOfEventDay = new Date(eventDate);
+  endOfEventDay.setHours(23, 59, 59, 999);
+  const isPast = endOfEventDay < new Date();
+
   return (
-    <div className="event-card">
+    <div className={`event-card ${isPast ? 'past-event' : ''}`}>
       <div className="event-card-header">
         <span className="category-badge">{event.category}</span>
-        {isFull ? (
+        {isPast ? (
+          <span className="capacity-badge ended">Event Ended</span>
+        ) : isFull ? (
           <span className="capacity-badge full">Full</span>
         ) : (
           <span className="capacity-badge open">{availableSeats} seats left</span>
@@ -55,8 +63,11 @@ const EventCard = ({ event }) => {
       </div>
 
       <div className="event-card-footer">
-        <Link to={`/events/${eventId}`} className="btn btn-primary btn-block">
-          View Details
+        <Link 
+          to={`/events/${eventId}`} 
+          className={`btn ${isPast ? 'btn-secondary' : 'btn-primary'} btn-block`}
+        >
+          {isPast ? 'View Details (Ended)' : 'View Details'}
         </Link>
       </div>
     </div>

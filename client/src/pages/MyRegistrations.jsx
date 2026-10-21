@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { registrationService } from '../services/registrationService';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 
 const MyRegistrations = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filterParam = searchParams.get('filter') || 'all';
+
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -56,6 +59,32 @@ const MyRegistrations = () => {
     }
   };
 
+  const now = new Date();
+
+  // Helper to determine if an event is in the past
+  const isEventPast = (reg) => {
+    if (!reg.eventId || !reg.eventId.eventDate) return false;
+    const eventDate = new Date(reg.eventId.eventDate);
+    const endOfEventDay = new Date(eventDate);
+    endOfEventDay.setHours(23, 59, 59, 999);
+    return endOfEventDay < now;
+  };
+
+  // Count stats
+  const upcomingCount = registrations.filter((r) => !isEventPast(r)).length;
+  const pastCount = registrations.filter((r) => isEventPast(r)).length;
+
+  // Filter list according to active tab
+  const displayedRegistrations = registrations.filter((reg) => {
+    if (filterParam === 'upcoming') {
+      return !isEventPast(reg);
+    }
+    if (filterParam === 'past') {
+      return isEventPast(reg);
+    }
+    return true; // 'all'
+  });
+
   return (
     <div className="page-container">
       <div className="page-header">
@@ -79,13 +108,49 @@ const MyRegistrations = () => {
 
       {error && <ErrorMessage message={error} onRetry={fetchRegistrations} />}
 
+      {/* Filter Tabs */}
+      <div className="filter-bar" style={{ marginBottom: '1.25rem' }}>
+        <div className="category-pills">
+          <button
+            className={`pill-btn ${filterParam === 'all' ? 'active' : ''}`}
+            onClick={() => setSearchParams({ filter: 'all' })}
+          >
+            All Registrations ({registrations.length})
+          </button>
+          <button
+            className={`pill-btn ${filterParam === 'upcoming' ? 'active' : ''}`}
+            onClick={() => setSearchParams({ filter: 'upcoming' })}
+          >
+            Upcoming Events ({upcomingCount})
+          </button>
+          <button
+            className={`pill-btn ${filterParam === 'past' ? 'active' : ''}`}
+            onClick={() => setSearchParams({ filter: 'past' })}
+          >
+            Past / Completed ({pastCount})
+          </button>
+        </div>
+      </div>
+
       {loading ? (
         <LoadingSpinner message="Loading your registrations..." />
-      ) : registrations.length === 0 ? (
+      ) : displayedRegistrations.length === 0 ? (
         <div className="empty-state-card">
           <span className="empty-icon">🎟️</span>
-          <h3>No Active Registrations</h3>
-          <p>You haven't registered for any college events yet.</p>
+          <h3>
+            {filterParam === 'upcoming'
+              ? 'No Upcoming Registrations'
+              : filterParam === 'past'
+              ? 'No Past Event History'
+              : 'No Active Registrations'}
+          </h3>
+          <p>
+            {filterParam === 'upcoming'
+              ? 'You do not have any upcoming registered events scheduled right now.'
+              : filterParam === 'past'
+              ? 'You have not attended any completed events yet.'
+              : "You haven't registered for any college events yet."}
+          </p>
           <Link to="/events" className="btn btn-primary btn-md">
             Browse Campus Events
           </Link>
@@ -100,15 +165,16 @@ const MyRegistrations = () => {
                   <th>Category</th>
                   <th>Event Date</th>
                   <th>Venue</th>
-                  <th>Registered On</th>
                   <th>Status</th>
                   <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {registrations.map((reg) => {
+                {displayedRegistrations.map((reg) => {
                   const event = reg.eventId;
                   const regId = reg._id || reg.registrationId;
+                  const isPast = isEventPast(reg);
+
                   const eventDateStr = event?.eventDate
                     ? new Date(event.eventDate).toLocaleDateString('en-US', {
                         month: 'short',
@@ -116,16 +182,9 @@ const MyRegistrations = () => {
                         year: 'numeric'
                       })
                     : 'N/A';
-                  const regDateStr = reg.registrationDate
-                    ? new Date(reg.registrationDate).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })
-                    : 'N/A';
 
                   return (
-                    <tr key={regId}>
+                    <tr key={regId} style={isPast ? { backgroundColor: '#fafbfc' } : {}}>
                       <td>
                         <div className="event-title-cell">
                           <span className="font-semibold">{event?.eventTitle || 'Deleted Event'}</span>
@@ -135,11 +194,30 @@ const MyRegistrations = () => {
                       <td>
                         <span className="category-badge sm">{event?.category || 'General'}</span>
                       </td>
-                      <td>{eventDateStr}</td>
-                      <td>{event?.venue || 'N/A'}</td>
-                      <td>{regDateStr}</td>
                       <td>
-                        <span className="status-badge registered">{reg.participationStatus}</span>
+                        {eventDateStr}
+                        {isPast && (
+                          <span 
+                            style={{ 
+                              display: 'block', 
+                              fontSize: '0.72rem', 
+                              color: '#64748b', 
+                              fontWeight: 500 
+                            }}
+                          >
+                            (Completed)
+                          </span>
+                        )}
+                      </td>
+                      <td>{event?.venue || 'N/A'}</td>
+                      <td>
+                        {isPast ? (
+                          <span className="status-badge" style={{ backgroundColor: '#f1f5f9', color: '#475569' }}>
+                            Concluded
+                          </span>
+                        ) : (
+                          <span className="status-badge registered">{reg.participationStatus}</span>
+                        )}
                       </td>
                       <td className="text-right action-buttons-cell">
                         {event && (
@@ -150,14 +228,27 @@ const MyRegistrations = () => {
                             Details
                           </Link>
                         )}
-                        <button
-                          onClick={() => handleCancel(regId, event?.eventTitle || 'Event')}
-                          disabled={cancellingId === regId}
-                          className="btn btn-danger btn-xs"
-                          title="Cancel Registration"
-                        >
-                          {cancellingId === regId ? 'Cancelling...' : 'Cancel Registration'}
-                        </button>
+                        {!isPast ? (
+                          <button
+                            onClick={() => handleCancel(regId, event?.eventTitle || 'Event')}
+                            disabled={cancellingId === regId}
+                            className="btn btn-danger btn-xs"
+                            title="Cancel Registration"
+                          >
+                            {cancellingId === regId ? 'Cancelling...' : 'Cancel Registration'}
+                          </button>
+                        ) : (
+                          <span 
+                            style={{ 
+                              fontSize: '0.75rem', 
+                              color: '#94a3b8', 
+                              fontStyle: 'italic',
+                              padding: '4px 6px' 
+                            }}
+                          >
+                            Past Event
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );
