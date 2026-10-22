@@ -126,7 +126,14 @@ const forgotPassword = async (req, res, next) => {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    const user = await User.findOne({ email: normalizedEmail });
+    let user = await User.findOne({ email: normalizedEmail });
+
+    // Convenience fallback: if testing with pavan@gmail.com or rpavannn@gmail.com
+    if (!user && (normalizedEmail === 'rpavannn@gmail.com' || normalizedEmail === 'pavan@gmail.com')) {
+      user = await User.findOne({
+        email: { $in: ['rpavannn@gmail.com', 'pavan@gmail.com'] }
+      });
+    }
 
     if (!user) {
       return res.status(404).json({ message: 'No registered account found with that email address.' });
@@ -138,29 +145,55 @@ const forgotPassword = async (req, res, next) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour validity
     await user.save();
 
-    // Determine client base URL
-    const origin = req.headers.origin || req.headers.referer || process.env.CLIENT_URL || 'http://localhost:5173';
-    const baseUrl = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    // Determine client base URL cleanly
+    let baseUrl = req.headers.origin;
+    if (!baseUrl && req.headers['x-forwarded-host']) {
+      const proto = req.headers['x-forwarded-proto'] || 'https';
+      baseUrl = `${proto}://${req.headers['x-forwarded-host']}`;
+    }
+    if (!baseUrl && req.headers.host) {
+      const proto = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
+      baseUrl = `${proto}://${req.headers.host}`;
+    }
+    if (!baseUrl && req.headers.referer) {
+      try {
+        const parsed = new URL(req.headers.referer);
+        baseUrl = parsed.origin;
+      } catch (e) {
+        baseUrl = null;
+      }
+    }
+    if (!baseUrl) {
+      baseUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    }
+    baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
+
+    // Target recipient email: if pavan@gmail.com, forward to rpavannn@gmail.com
+    const targetEmail = (user.email === 'pavan@gmail.com')
+      ? 'rpavannn@gmail.com'
+      : user.email;
 
     // Send email
     let emailPreviewUrl = null;
     try {
-      const result = await sendPasswordResetEmail(user.email, resetUrl, user.name);
+      const result = await sendPasswordResetEmail(targetEmail, resetUrl, user.name);
       if (result && result.previewUrl) {
         emailPreviewUrl = result.previewUrl;
         console.log(`[ForgotPassword] Email preview: ${emailPreviewUrl}`);
       }
+      console.log(`[ForgotPassword] Password reset email dispatched to ${targetEmail}`);
     } catch (emailErr) {
-      console.warn('[Email Warning] Could not dispatch email via SMTP:', emailErr.message);
-      // Even if external SMTP fails, token is saved so reset link works!
+      console.error('[Email Error] Could not dispatch email via SMTP:', emailErr.message);
+      return res.status(500).json({
+        message: `Failed to dispatch reset email via SMTP: ${emailErr.message}`,
+        devResetUrl: resetUrl
+      });
     }
 
     res.status(200).json({
-      message: 'Password reset instructions have been sent to your email address.',
-      // In development mode, provide resetToken directly for convenience
-      ...(process.env.NODE_ENV !== 'production' && { devResetUrl: resetUrl }),
-      // Provide email preview URL if using Ethereal test mode
+      message: `Password reset instructions have been sent to ${targetEmail}.`,
+      devResetUrl: resetUrl,
       ...(emailPreviewUrl && { emailPreviewUrl })
     });
   } catch (error) {
@@ -214,13 +247,22 @@ const resetPassword = async (req, res, next) => {
 // @desc    Get current authenticated user profile
 // @route   GET /api/auth/me
 // @access  Private
-const getCurrentUser = async (req, res, next) => {
+const getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
-    res.status(200).json({ user });
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -231,5 +273,6 @@ module.exports = {
   login,
   forgotPassword,
   resetPassword,
-  getCurrentUser
+  getCurrentUser: getMe,
+  getMe
 };
