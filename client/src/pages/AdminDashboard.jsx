@@ -55,10 +55,15 @@ const AdminDashboard = () => {
           </p>
         </div>
         <div className="welcome-actions">
-          <Link to="/admin/events" className="btn btn-manage-events">
-            <span className="btn-manage-icon">📅</span>
+          <Link to="/admin/events" className="btn-dashboard-action primary">
+            <span className="btn-action-icon">📅</span>
             <span>Manage Events</span>
-            <span className="btn-manage-arrow">&rarr;</span>
+            <span className="btn-action-arrow">&rarr;</span>
+          </Link>
+          <Link to="/events" className="btn-dashboard-action secondary">
+            <span className="btn-action-icon">🔍</span>
+            <span>Browse Events</span>
+            <span className="btn-action-arrow">&rarr;</span>
           </Link>
         </div>
       </div>
@@ -167,7 +172,7 @@ const AdminDashboard = () => {
                       </td>
                       <td>{evt.maximumParticipants} seats</td>
                       <td>
-                        <span className={`capacity-indicator ${isFull ? 'full' : 'normal'}`}>
+                        <span className="capacity-indicator ${isFull ? 'full' : 'normal'}">
                           {regCount} / {evt.maximumParticipants} {isFull && '(Full)'}
                         </span>
                       </td>

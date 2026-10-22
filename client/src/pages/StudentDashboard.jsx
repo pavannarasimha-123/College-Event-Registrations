@@ -52,11 +52,15 @@ const StudentDashboard = () => {
           </p>
         </div>
         <div className="welcome-actions">
-          <Link to="/events" className="btn btn-primary">
-            Browse Events
+          <Link to="/events" className="btn-dashboard-action primary">
+            <span className="btn-action-icon">🔍</span>
+            <span>Browse Events</span>
+            <span className="btn-action-arrow">&rarr;</span>
           </Link>
-          <Link to="/student/my-registrations" className="btn btn-secondary">
-            My Registrations
+          <Link to="/student/my-registrations" className="btn-dashboard-action secondary">
+            <span className="btn-action-icon">🎫</span>
+            <span>My Registrations</span>
+            <span className="btn-action-arrow">&rarr;</span>
           </Link>
         </div>
       </div>

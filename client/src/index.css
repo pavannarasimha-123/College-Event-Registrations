@@ -869,7 +869,81 @@ body {
 
 .welcome-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------------- Enhanced Action Buttons (Student & Admin) ---------------- */
+.btn-dashboard-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  white-space: nowrap;
+}
+
+.btn-dashboard-action.primary {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+.btn-dashboard-action.primary:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px 0 rgba(37, 99, 235, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  color: #ffffff !important;
+}
+
+.btn-dashboard-action.primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.25);
+}
+
+.btn-dashboard-action.secondary {
+  background: #ffffff;
+  color: #1e293b !important;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.btn-dashboard-action.secondary:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px 0 rgba(0, 0, 0, 0.08);
+}
+
+.btn-dashboard-action.secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.04);
+}
+
+.btn-dashboard-action .btn-action-icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+}
+
+.btn-dashboard-action .btn-action-arrow {
+  font-size: 1.05rem;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.btn-dashboard-action:hover .btn-action-arrow {
+  transform: translateX(4px);
 }
 
 /* ---------------- Enhanced Manage Events Button ---------------- */
