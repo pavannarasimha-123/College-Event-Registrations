@@ -1,29 +1,23 @@
 const nodemailer = require('nodemailer');
 
-// Fallback SMTP credentials so Render / production always delivers live emails
-const DEFAULT_EMAIL_HOST = 'smtp.gmail.com';
-const DEFAULT_EMAIL_PORT = 465;
-const DEFAULT_EMAIL_USER = 'rpavannn@gmail.com';
-const DEFAULT_EMAIL_PASS = 'ehjpqxdyjmejvduq';
-
 let _transporter = null;
 let _transporterReady = false;
 let _previewMode = false;
 
 /**
  * Initialize the email transporter.
- * - If EMAIL_USER + EMAIL_PASS are set → use real Gmail/SMTP.
+ * Reads credentials strictly from process.env (or .env file).
  * - Uses SSL (port 465) for Gmail by default to prevent connection timeouts on cloud hosts.
  */
 const initTransporter = async () => {
   if (_transporter && _transporterReady) return _transporter;
 
-  const host = process.env.EMAIL_HOST || DEFAULT_EMAIL_HOST;
-  const port = Number(process.env.EMAIL_PORT) || DEFAULT_EMAIL_PORT;
-  const user = process.env.EMAIL_USER || DEFAULT_EMAIL_USER;
-  const pass = process.env.EMAIL_PASS || DEFAULT_EMAIL_PASS;
+  const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+  const port = Number(process.env.EMAIL_PORT) || 465;
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS;
 
-  // Real SMTP (Gmail or custom host)
+  // Real SMTP (Gmail or custom host) if environment variables are provided
   if (user && pass) {
     const isGmail = (host && host.includes('gmail')) || (user && user.includes('gmail'));
     
@@ -53,7 +47,7 @@ const initTransporter = async () => {
     return _transporter;
   }
 
-  // Option 2: Ethereal test account (auto-created fallback)
+  // Option 2: Ethereal test account (auto-created fallback when no env variables are set)
   try {
     const testAccount = await nodemailer.createTestAccount();
     _transporter = nodemailer.createTransport({
@@ -108,7 +102,8 @@ const sendEmail = async (mailOptions) => {
  * Sends a Password Reset Email with action link
  */
 const sendPasswordResetEmail = async (toEmail, resetUrl, userName = 'Student') => {
-  const sender = process.env.EMAIL_FROM || `"College Event Portal" <${process.env.EMAIL_USER || DEFAULT_EMAIL_USER}>`;
+  const defaultSender = process.env.EMAIL_USER ? `"College Event Portal" <${process.env.EMAIL_USER}>` : '"College Event Portal" <no-reply@college-events.edu>';
+  const sender = process.env.EMAIL_FROM || defaultSender;
 
   const mailOptions = {
     from: sender,
@@ -161,7 +156,8 @@ const sendEventRegistrationEmail = async (toEmail, studentName, event, registrat
       })
     : 'TBA';
 
-  const sender = process.env.EMAIL_FROM || `"College Event Portal" <${process.env.EMAIL_USER || DEFAULT_EMAIL_USER}>`;
+  const defaultSender = process.env.EMAIL_USER ? `"College Event Portal" <${process.env.EMAIL_USER}>` : '"College Event Portal" <no-reply@college-events.edu>';
+  const sender = process.env.EMAIL_FROM || defaultSender;
 
   const mailOptions = {
     from: sender,
