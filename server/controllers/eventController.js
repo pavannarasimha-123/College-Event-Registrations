@@ -131,6 +131,16 @@ const createEvent = async (req, res, next) => {
     if (isNaN(parsedDate.getTime())) {
       return res.status(400).json({ message: 'Please provide a valid Event Date.' });
     }
+
+    // Bug Fix: Prevent creating events with past dates
+    const endOfEventDay = new Date(parsedDate);
+    endOfEventDay.setHours(23, 59, 59, 999);
+    if (endOfEventDay < new Date()) {
+      return res.status(400).json({
+        message: 'Event Date cannot be in the past. Please select today or a future date.'
+      });
+    }
+
     if (!venue || !venue.trim()) {
       return res.status(400).json({ message: 'Venue is required.' });
     }
@@ -194,6 +204,18 @@ const updateEvent = async (req, res, next) => {
     if (eventDate !== undefined) {
       const parsedDate = new Date(eventDate);
       if (isNaN(parsedDate.getTime())) return res.status(400).json({ message: 'Please provide a valid date.' });
+
+      // If the date is changed, ensure it's not set to a past date
+      const isDateChanged = !event.eventDate || parsedDate.toISOString().split('T')[0] !== new Date(event.eventDate).toISOString().split('T')[0];
+      if (isDateChanged) {
+        const endOfEventDay = new Date(parsedDate);
+        endOfEventDay.setHours(23, 59, 59, 999);
+        if (endOfEventDay < new Date()) {
+          return res.status(400).json({
+            message: 'Event Date cannot be in the past. Please select today or a future date.'
+          });
+        }
+      }
       event.eventDate = parsedDate;
     }
     if (venue !== undefined) {

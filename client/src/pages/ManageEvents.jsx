@@ -186,6 +186,7 @@ const ManageEvents = () => {
         </div>
         <button
           onClick={() => {
+            setActionAlert({ type: '', text: '' });
             setEditingEvent(null);
             setIsFormModalOpen(true);
           }}
@@ -347,6 +348,7 @@ const ManageEvents = () => {
                   setEditingEvent(null);
                 }}
                 isSubmitting={isSubmitting}
+                serverError={actionAlert.type === 'error' ? actionAlert.text : ''}
               />
             </div>
           </div>

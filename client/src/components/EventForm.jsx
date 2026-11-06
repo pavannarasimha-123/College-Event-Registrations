@@ -2,7 +2,18 @@ import React, { useState, useEffect } from 'react';
 
 const CATEGORIES = ['Technical', 'Cultural', 'Sports', 'Workshop', 'Seminar', 'Other'];
 
-const EventForm = ({ initialData, onSubmit, onCancel, isSubmitting }) => {
+// Helper to get local date string formatted as YYYY-MM-DD
+const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const EventForm = ({ initialData, onSubmit, onCancel, isSubmitting, serverError }) => {
+  const todayStr = getTodayDateString();
+
   const [formData, setFormData] = useState({
     eventTitle: '',
     category: 'Technical',
@@ -58,6 +69,18 @@ const EventForm = ({ initialData, onSubmit, onCancel, isSubmitting }) => {
     if (!formData.eventDate) {
       return setFormError('Event Date is required.');
     }
+
+    // Bug Fix: Prevent past date selection
+    const isCreating = !initialData;
+    const initialFormattedDate = initialData?.eventDate
+      ? new Date(initialData.eventDate).toISOString().split('T')[0]
+      : '';
+    const isDateChanged = initialData && formData.eventDate !== initialFormattedDate;
+
+    if ((isCreating || isDateChanged) && formData.eventDate < todayStr) {
+      return setFormError('Event Date cannot be in the past. Please select today or a future date.');
+    }
+
     if (!formData.venue.trim()) {
       return setFormError('Venue is required.');
     }
@@ -71,9 +94,22 @@ const EventForm = ({ initialData, onSubmit, onCancel, isSubmitting }) => {
     onSubmit(formData);
   };
 
+  const initialFormattedDate = initialData?.eventDate
+    ? new Date(initialData.eventDate).toISOString().split('T')[0]
+    : '';
+
+  // Min date allowed in the HTML date picker:
+  // For new events: today
+  // For existing events: if it was in the past, allow initial date so form doesn't block loading, otherwise today
+  const minDate = initialData && initialFormattedDate && initialFormattedDate < todayStr
+    ? initialFormattedDate
+    : todayStr;
+
+  const displayError = formError || serverError;
+
   return (
     <form onSubmit={handleSubmit} className="event-form">
-      {formError && <div className="form-alert error">{formError}</div>}
+      {displayError && <div className="form-alert error">{displayError}</div>}
 
       <div className="form-group">
         <label htmlFor="eventTitle">Event Title *</label>
@@ -112,10 +148,14 @@ const EventForm = ({ initialData, onSubmit, onCancel, isSubmitting }) => {
             type="date"
             id="eventDate"
             name="eventDate"
+            min={minDate}
             value={formData.eventDate}
             onChange={handleChange}
             required
           />
+          <small style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '4px', display: 'block' }}>
+            Events cannot be scheduled in the past (Min: {todayStr})
+          </small>
         </div>
       </div>
 
