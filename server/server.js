@@ -79,6 +79,22 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
+// Helper to attach graceful error listener to server instance
+const attachErrorListener = (serverInstance) => {
+  serverInstance.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n[Server Error] Port ${PORT} is already in use by another running process.`);
+      console.error(`To free port ${PORT} in Windows PowerShell, run:`);
+      console.error(`  Stop-Process -Id (Get-NetTCPConnection -LocalPort ${PORT}).OwningProcess -Force\n`);
+      process.exit(1);
+    } else {
+      console.error(`[Server Error]:`, err);
+      process.exit(1);
+    }
+  });
+  return serverInstance;
+};
+
 // Start server function
 const startServer = async () => {
   try {
@@ -96,13 +112,13 @@ const startServer = async () => {
       console.log(`[Server] College Event Registration API running on port ${PORT}`);
       console.log(`[Server] Base URL: http://localhost:${PORT}`);
     });
-    return serverInstance;
+    return attachErrorListener(serverInstance);
   } catch (error) {
     console.error(`[Server] Failed to initialize database: ${error.message}`);
     const serverInstance = app.listen(PORT, () => {
       console.log(`[Server] Started in degraded mode on port ${PORT} (MongoDB connection pending)`);
     });
-    return serverInstance;
+    return attachErrorListener(serverInstance);
   }
 };
 
