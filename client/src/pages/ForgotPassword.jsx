@@ -9,6 +9,7 @@ const ForgotPassword = () => {
   const [error, setError] = useState('');
   const [devResetUrl, setDevResetUrl] = useState('');
   const [emailPreviewUrl, setEmailPreviewUrl] = useState('');
+  const [emailSent, setEmailSent] = useState(true);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +17,7 @@ const ForgotPassword = () => {
     setMessage('');
     setDevResetUrl('');
     setEmailPreviewUrl('');
+    setEmailSent(true);
 
     if (!email.trim()) {
       return setError('Please enter your registered email address.');
@@ -24,7 +26,10 @@ const ForgotPassword = () => {
     try {
       setLoading(true);
       const res = await authService.forgotPassword(email.trim());
-      setMessage(res.message || 'A password reset link has been dispatched to your email.');
+      setMessage(res.message || 'A password reset link has been processed for your account.');
+      if (res.emailSent !== undefined) {
+        setEmailSent(res.emailSent);
+      }
       if (res.devResetUrl) {
         setDevResetUrl(res.devResetUrl);
       }
@@ -85,7 +90,7 @@ const ForgotPassword = () => {
             <Link 
               to={devResetUrl.startsWith('http') ? new URL(devResetUrl, window.location.origin).pathname : devResetUrl} 
               className="btn btn-primary btn-sm"
-              style={{ display: 'inline-block', textDecoration: 'none', padding: '8px 18px', fontWeight: 600 }}
+              style={{ display: 'inline-block', textDecoration: 'none', padding: '10px 22px', fontWeight: 600 }}
             >
               Reset My Password Now &rarr;
             </Link>
@@ -119,7 +124,9 @@ const ForgotPassword = () => {
         ) : (
           <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
             <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1.25rem' }}>
-              Please check your inbox (and spam folder) for the password reset email. The link will remain active for 1 hour.
+              {emailSent
+                ? 'Please check your inbox (and spam folder) for the password reset email. The link will remain active for 1 hour.'
+                : 'Render free tier blocks outbound SMTP, so no external email was delivered. Please click the blue "Reset My Password Now" button above to change your password directly.'}
             </p>
             <button
               onClick={() => {
@@ -127,6 +134,7 @@ const ForgotPassword = () => {
                 setError('');
                 setEmail('');
                 setDevResetUrl('');
+                setEmailSent(true);
               }}
               className="btn btn-secondary btn-sm"
             >
