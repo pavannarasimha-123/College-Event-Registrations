@@ -33,6 +33,9 @@ const ForgotPassword = () => {
       }
     } catch (err) {
       console.error('Forgot password error:', err);
+      if (err.response?.data?.devResetUrl) {
+        setDevResetUrl(err.response.data.devResetUrl);
+      }
       const serverMsg = err.response?.data?.message;
       if (serverMsg) {
         setError(serverMsg);
@@ -71,10 +74,20 @@ const ForgotPassword = () => {
         )}
 
         {devResetUrl && (
-          <div className="form-alert info" style={{ wordBreak: 'break-all' }}>
-            <strong>🔗 Direct Reset Link:</strong>{' '}
-            <Link to={new URL(devResetUrl, window.location.origin).pathname} className="auth-link">
-              Click here to reset your password now
+          <div className="form-alert info" style={{ wordBreak: 'break-all', marginTop: '1rem', borderLeft: '4px solid #2563eb' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '1.2rem' }}>🔗</span>
+              <strong style={{ fontSize: '0.95rem', color: '#1e40af' }}>Direct Password Reset Link:</strong>
+            </div>
+            <p style={{ margin: '0 0 10px 0', fontSize: '0.85rem', color: '#475569' }}>
+              Click the button below to set your new password immediately:
+            </p>
+            <Link 
+              to={devResetUrl.startsWith('http') ? new URL(devResetUrl, window.location.origin).pathname : devResetUrl} 
+              className="btn btn-primary btn-sm"
+              style={{ display: 'inline-block', textDecoration: 'none', padding: '8px 18px', fontWeight: 600 }}
+            >
+              Reset My Password Now &rarr;
             </Link>
           </div>
         )}
@@ -109,22 +122,25 @@ const ForgotPassword = () => {
               Please check your inbox (and spam folder) for the password reset email. The link will remain active for 1 hour.
             </p>
             <button
-              type="button"
-              className="btn btn-outline btn-block"
               onClick={() => {
                 setMessage('');
+                setError('');
+                setEmail('');
                 setDevResetUrl('');
-                setEmailPreviewUrl('');
               }}
+              className="btn btn-secondary btn-sm"
             >
-              Try another email
+              Request Another Link
             </button>
           </div>
         )}
 
         <div className="auth-footer">
           <p>
-            Remember your credentials? <Link to="/login" className="auth-link">Back to Sign In</Link>
+            Remember your credentials?{' '}
+            <Link to="/login" className="auth-link">
+              Back to Sign In
+            </Link>
           </p>
         </div>
       </div>

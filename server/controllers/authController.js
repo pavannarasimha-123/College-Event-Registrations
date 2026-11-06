@@ -174,28 +174,39 @@ const forgotPassword = async (req, res, next) => {
       ? 'rpavannn@gmail.com'
       : user.email;
 
-    // Send email
+    // Send email with fallback handling
     let emailPreviewUrl = null;
+    let emailSent = false;
+    let emailErrorMsg = '';
+
     try {
       const result = await sendPasswordResetEmail(targetEmail, resetUrl, user.name);
       if (result && result.previewUrl) {
         emailPreviewUrl = result.previewUrl;
         console.log(`[ForgotPassword] Email preview: ${emailPreviewUrl}`);
       }
+      emailSent = true;
       console.log(`[ForgotPassword] Password reset email dispatched to ${targetEmail}`);
     } catch (emailErr) {
-      console.error('[Email Error] Could not dispatch email via SMTP:', emailErr.message);
-      return res.status(500).json({
-        message: `Failed to dispatch reset email via SMTP: ${emailErr.message}`,
-        devResetUrl: resetUrl
-      });
+      emailErrorMsg = emailErr.message || 'SMTP Connection timeout';
+      console.warn('[Email Warning] Could not dispatch email via SMTP:', emailErrorMsg);
+      // External cloud SMTP timeout must NOT block the user; reset token is saved and valid
     }
 
-    res.status(200).json({
-      message: `Password reset instructions have been sent to ${targetEmail}.`,
-      devResetUrl: resetUrl,
-      ...(emailPreviewUrl && { emailPreviewUrl })
-    });
+    if (emailSent) {
+      res.status(200).json({
+        message: `Password reset instructions have been sent to ${targetEmail}.`,
+        devResetUrl: resetUrl,
+        emailSent: true,
+        ...(emailPreviewUrl && { emailPreviewUrl })
+      });
+    } else {
+      res.status(200).json({
+        message: `Password reset link generated successfully! Since cloud email delivery timed out, you can reset your password immediately using the direct link below.`,
+        devResetUrl: resetUrl,
+        emailSent: false
+      });
+    }
   } catch (error) {
     next(error);
   }

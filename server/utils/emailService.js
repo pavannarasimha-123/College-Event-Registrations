@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 
 // Fallback SMTP credentials so Render / production always delivers live emails
 const DEFAULT_EMAIL_HOST = 'smtp.gmail.com';
-const DEFAULT_EMAIL_PORT = 587;
+const DEFAULT_EMAIL_PORT = 465;
 const DEFAULT_EMAIL_USER = 'rpavannn@gmail.com';
 const DEFAULT_EMAIL_PASS = 'ehjpqxdyjmejvduq';
 
@@ -13,34 +13,43 @@ let _previewMode = false;
 /**
  * Initialize the email transporter.
  * - If EMAIL_USER + EMAIL_PASS are set → use real Gmail/SMTP.
- * - Otherwise → use default Gmail SMTP.
+ * - Uses SSL (port 465) for Gmail by default to prevent connection timeouts on cloud hosts.
  */
 const initTransporter = async () => {
   if (_transporter && _transporterReady) return _transporter;
 
   const host = process.env.EMAIL_HOST || DEFAULT_EMAIL_HOST;
-  const port = process.env.EMAIL_PORT || DEFAULT_EMAIL_PORT;
+  const port = Number(process.env.EMAIL_PORT) || DEFAULT_EMAIL_PORT;
   const user = process.env.EMAIL_USER || DEFAULT_EMAIL_USER;
   const pass = process.env.EMAIL_PASS || DEFAULT_EMAIL_PASS;
 
   // Real SMTP (Gmail or custom host)
   if (user && pass) {
-    const config = host
+    const isGmail = (host && host.includes('gmail')) || (user && user.includes('gmail'));
+    
+    // For Gmail, 'service: gmail' uses direct SSL on port 465 which avoids Render STARTTLS port 587 timeouts
+    const config = isGmail
       ? {
-          host,
-          port: Number(port),
-          secure: Number(port) === 465,
-          auth: { user, pass }
+          service: 'gmail',
+          auth: { user, pass },
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 10000
         }
       : {
-          service: 'gmail',
-          auth: { user, pass }
+          host,
+          port,
+          secure: port === 465,
+          auth: { user, pass },
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 10000
         };
 
     _transporter = nodemailer.createTransport(config);
     _previewMode = false;
     _transporterReady = true;
-    console.log(`[Email] ✓ Real SMTP transporter ready (${host || 'gmail'}) for ${user}`);
+    console.log(`[Email] ✓ Real SMTP transporter ready (${isGmail ? 'service: gmail (SSL)' : host}) for ${user}`);
     return _transporter;
   }
 
@@ -54,7 +63,8 @@ const initTransporter = async () => {
       auth: {
         user: testAccount.user,
         pass: testAccount.pass
-      }
+      },
+      connectionTimeout: 6000
     });
     _previewMode = true;
     _transporterReady = true;
@@ -78,7 +88,7 @@ const initTransporter = async () => {
 };
 
 /**
- * Send an email and log the Ethereal preview URL if in test mode.
+ * Send an email with timeout protection.
  */
 const sendEmail = async (mailOptions) => {
   const transporter = await initTransporter();
